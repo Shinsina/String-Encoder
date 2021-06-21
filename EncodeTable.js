@@ -1,5 +1,5 @@
 export default {
-  " ": { decimal: "32", "hex": "20", "octal": "040", "binary": "0100000" },
+  " ": { "decimal": "32", "hex": "20", "octal": "040", "binary": "0100000" },
   "!": { "decimal": "33", "hex": "21", "octal": "041", "binary": "0100001" },
   "\"": { "decimal": "34", "hex": "22", "octal": "042", "binary": "0100010" },
   "#": { "decimal": "35", "hex": "23", "octal": "043", "binary": "0100011" },
