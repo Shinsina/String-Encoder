@@ -1,4 +1,4 @@
-import { table } from './EncodeTable.js'
+import table from './EncodeTable.js'
 export function encoder(unencodedString) {
 const unencodedStringSplit = unencodedString.split('')
 let octalArray = []
