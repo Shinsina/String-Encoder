@@ -1,4 +1,4 @@
-module.exports = {
+export const table = {
   " ": { decimal: "32", "hex": "20", "octal": "040", "binary": "0100000" },
   "!": { "decimal": "33", "hex": "21", "octal": "041", "binary": "0100001" },
   "\"": { "decimal": "34", "hex": "22", "octal": "042", "binary": "0100010" },

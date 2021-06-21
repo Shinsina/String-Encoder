@@ -1,5 +1,5 @@
-const table = require('./EncodeTable')
-function encoder(unencodedString) {
+import { table } from './EncodeTable.js'
+export function encoder(unencodedString) {
 const unencodedStringSplit = unencodedString.split('')
 let octalArray = []
 unencodedStringSplit.forEach(char => {
@@ -37,7 +37,7 @@ binaryStringSplit.forEach((char,index) => {
 const encodedString = binaryStringSplit.join('')
 return encodedString
 }
-function decoder(encodedString) {
+export function decoder(encodedString) {
   let itemKeysArray = []
   let decodeBinaryArray =[]
   let decodeHexArray = []
@@ -97,4 +97,5 @@ function decoder(encodedString) {
   return decodedString
 }
 const testString = '<p>This is a test of how a message service. Might be able to handle encode and decode of messages</p>'
+console.log(encoder(testString))
 console.log(decoder(encoder(testString)))
