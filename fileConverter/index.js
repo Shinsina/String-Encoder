@@ -1,6 +1,7 @@
 import fs from 'fs';
 import readline from 'readline';
 import inquirer from 'inquirer';
+import { returnFieldNames, unravelObject } from './fieldHelpers.js';
 
 const { fileLocation, convertTo, hasLabels } = await inquirer.prompt([
   {
@@ -41,37 +42,16 @@ const isJSON = (filePath) => {
   const fileData = fs.readFileSync(filePath);
   const JSONData = JSON.parse(fileData);
   const formattedData = [];
-  if  (Array.isArray(JSONData)) {
+  if (Array.isArray(JSONData)) {
     JSONData.forEach((item) => {
-      formattedData.push(`${item}`)
+      formattedData.push(`${unravelObject(item)}\n`);
     });
   } else {
-    const fieldArrays = {};
-    Object.keys(JSONData).forEach((key) => {
-      if (Array.isArray(JSONData[key])) {
-        fieldArrays[key] = JSONData[key];
-      }
-    });
-    let longestArr = 0;
-    formattedData.push(`${Object.keys(fieldArrays).join()},\n`);
-    Object.keys(fieldArrays).forEach((fieldArray) => {
-      if(fieldArray.length > longestArr) {
-        longestArr = fieldArray.length;
-      }
-    });
-    for (let i = 0; i < longestArr; i += 1) {
-      let fileLine = '';
-      Object.keys(fieldArrays).forEach((array) => {
-        if(fieldArrays[array][i]){
-          fileLine += `${String(fieldArrays[array][i])},`;
-        }
-      });
-      if(fileLine){
-        formattedData.push(`${fileLine}\n`);
-      }
-    }
+    formattedData.push(`${unravelObject(JSONData)}\n`);
   }
-  return formattedData
+  const fieldNameString = String(returnFieldNames())
+  const formattedDataWithFieldNames = [`${fieldNameString}\n`].concat(formattedData);
+  return formattedDataWithFieldNames ;
 };
 
 const isNotJSON = async (filePath) => {
