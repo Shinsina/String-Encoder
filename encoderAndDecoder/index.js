@@ -109,7 +109,3 @@ export function decoder(encodedString) {
   const decodedString = createStringArray.join('');
   return decodedString;
 }
-
-const testString = '<p>This is a test of how a message service. Might be able to handle encode and decode of messages</p>';
-console.log(encoder(testString));
-console.log(decoder(encoder(testString)));
