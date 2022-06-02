@@ -46,7 +46,7 @@ export function prerequestValidator(fieldValueStore, body) {
     } else {
       isValid = false;
       alert(
-        `${key} is a (currently) unsupported field type, please consult the overall data type definition for this type for more information.`
+        `${key} is a (currently) unsupported field type, please consult the overall data type definition for this type for more information.`,
       );
     }
   });

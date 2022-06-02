@@ -32,7 +32,7 @@ export function addSearchField(fields, searchableField) {
       index: fieldCount,
       selectValue: searchableField.name,
       selectType: searchableField.type,
-      value
+      value,
     });
   }
   return fields;
@@ -41,7 +41,7 @@ export function addSearchField(fields, searchableField) {
 const initialValueByType = {
   Boolean: false,
   Number: 0,
-  Word: ''
+  Word: '',
 };
 
 /**

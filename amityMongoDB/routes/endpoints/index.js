@@ -5,7 +5,7 @@ import {
   insertNewItems,
   updateExtensionsOfType,
   updateEmbeddedReferences,
-  createEmbeddedReferences
+  createEmbeddedReferences,
 } from '$lib/requests';
 import { ObjectId } from 'mongodb';
 
@@ -24,7 +24,7 @@ export async function get(get) {
       ? await collection
           .find({
             _id: new ObjectId(queryParams.id),
-            isDefinition: queryParams.isDefinition
+            isDefinition: queryParams.isDefinition,
           })
           .project({ ...projection })
           .toArray()
@@ -35,15 +35,15 @@ export async function get(get) {
     return {
       status: 200,
       body: {
-        results
-      }
+        results,
+      },
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Requested data was not found'
-      }
+        error: 'Requested data was not found',
+      },
     };
   }
 }
@@ -87,7 +87,7 @@ export async function put(put) {
       'Numbers',
       'IDs',
       'Booleans',
-      'Dates'
+      'Dates',
     ];
     const dbConnection = await connectToDatabase();
     const db = dbConnection.db;
@@ -121,7 +121,7 @@ export async function put(put) {
       ? await Promise.all([
           await collection.updateMany(
             { type: oldTypeName },
-            { $rename: { ...renameTypeProps }, $set: { type, ...newTypeProps } }
+            { $rename: { ...renameTypeProps }, $set: { type, ...newTypeProps } },
           ),
           await updateExtensionsOfType(
             collection,
@@ -129,29 +129,29 @@ export async function put(put) {
             oldTypeName,
             renameTypeProps,
             newTypeProps,
-            ObjectId
+            ObjectId,
           ),
-          await updateEmbeddedReferences(new ObjectId(id), collection)
+          await updateEmbeddedReferences(new ObjectId(id), collection),
         ])
       : await Promise.all([
           await collection.updateOne(
             { _id: new ObjectId(id) },
-            { $set: { ...rest, ...(!Object.keys(_refs).includes('status') && { _refs }) } }
+            { $set: { ...rest, ...(!Object.keys(_refs).includes('status') && { _refs }) } },
           ),
-          await updateEmbeddedReferences(new ObjectId(id), collection)
+          await updateEmbeddedReferences(new ObjectId(id), collection),
         ]);
     return {
       status: 200,
       body: {
-        results
-      }
+        results,
+      },
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Requested data was unable to be updated'
-      }
+        error: 'Requested data was unable to be updated',
+      },
     };
   }
 }
@@ -187,15 +187,15 @@ export async function del(del) {
     return {
       status: 200,
       body: {
-        results
-      }
+        results,
+      },
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Request data was unable to be deleted'
-      }
+        error: 'Request data was unable to be deleted',
+      },
     };
   }
 }

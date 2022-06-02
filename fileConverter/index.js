@@ -1,20 +1,22 @@
 import fs from 'fs';
 import readline from 'readline';
 import inquirer from 'inquirer';
-import { returnFieldNames, unravelObject } from './fieldHelpers.js';
+import { returnFieldNames, unravelObject } from './fieldHelpers';
+
+const { log } = console;
 
 const { fileLocation, convertTo, hasLabels } = await inquirer.prompt([
   {
     type: 'input',
     name: 'fileLocation',
     message: 'Provide a relative file path to the data file',
-    default: `./data.json`
+    default: './data.json',
   },
   {
     type: 'input',
     name: 'convertTo',
     message: 'Name the file extension for the converted file',
-    default: 'txt'
+    default: 'txt',
   },
   {
     type: 'confirm',
@@ -22,7 +24,7 @@ const { fileLocation, convertTo, hasLabels } = await inquirer.prompt([
     message: 'Is this data labeled in the first row?',
     default: true,
     when: (ans) => !ans.fileLocation.match(/json$/),
-  }
+  },
 ]);
 
 async function readLines(stream) {
@@ -49,46 +51,52 @@ const isJSON = (filePath) => {
   } else {
     formattedData.push(`${unravelObject(JSONData)}\n`);
   }
-  const fieldNameString = String(returnFieldNames())
+  const fieldNameString = String(returnFieldNames());
   const formattedDataWithFieldNames = [`${fieldNameString}\n`].concat(formattedData);
-  return formattedDataWithFieldNames ;
+  return formattedDataWithFieldNames;
 };
 
 const isNotJSON = async (filePath) => {
   const fileStream = fs.createReadStream(filePath);
   const lines = await readLines(fileStream);
-  return await lines.join('\n')
+  return lines.join('\n');
 };
 
 const supportedFileTypes = {
-  'json': (fileLocation) => isJSON(fileLocation),
-  'txt': async (fileLocation) => await isNotJSON(fileLocation),
-  'csv': async (fileLocation) => await isNotJSON(fileLocation),
-  'xlsx': async (fileLocation) => await isNotJSON(fileLocation),
+  json: (fileLoc) => isJSON(fileLoc),
+  txt: async (fileLoc) => isNotJSON(fileLoc),
+  csv: async (fileLoc) => isNotJSON(fileLoc),
+  xlsx: async (fileLoc) => isNotJSON(fileLoc),
 };
 
 const finalizeData = {
-  'json': (processedData) => processedData.toString().replace(/\n,/g, '\n'),
-  'txt': (processedData) => processedData.toString(),
-  'csv': (processedData) => processedData.toString(),
-  'xlsx': (processedData) => processedData.toString()
-}
+  json: (processedData) => processedData.toString().replace(/\n,/g, '\n'),
+  txt: (processedData) => processedData.toString(),
+  csv: (processedData) => processedData.toString(),
+  xlsx: (processedData) => processedData.toString(),
+};
 
 const isSupportedFileType = fileLocation.match(/json$|txt$|csv$|xlsx$/)[0];
 const fileName = fileLocation.match(/\/(.+)\./)[1];
 
-if(isSupportedFileType) {
+if (isSupportedFileType) {
   const processedData = isSupportedFileType === 'json'
     ? supportedFileTypes[isSupportedFileType](fileLocation)
     : await supportedFileTypes[isSupportedFileType](fileLocation);
   if (supportedFileTypes[convertTo]) {
-    if(convertTo !== 'json') {
-      fs.writeFileSync(`./${fileName}.${convertTo}`, finalizeData[isSupportedFileType](processedData));
+    if (convertTo !== 'json') {
+      fs.writeFileSync(
+        `./${fileName}.${convertTo}`,
+        finalizeData[isSupportedFileType](processedData),
+      );
     } else {
       const keyedOutputObj = {};
       const arrayofDataArrays = [];
-      if  (hasLabels) {
-        const labelsArray = processedData.match(/.+\n/)[0].split(',').filter((value) => value !== '\n');
+      if (hasLabels) {
+        const labelsArray = processedData
+          .match(/.+\n/)[0]
+          .split(',')
+          .filter((value) => value !== '\n');
         const filterOutKeys = processedData.match(/.+\n/)[0];
         const dataArrays = processedData.match(/.+\n/g).filter((value) => value !== filterOutKeys);
         dataArrays.forEach((dataArray) => {
@@ -96,7 +104,7 @@ if(isSupportedFileType) {
         });
         labelsArray.forEach((label, index) => {
           arrayofDataArrays.forEach((dataArray) => {
-            if(keyedOutputObj[label]) {
+            if (keyedOutputObj[label]) {
               keyedOutputObj[label].push(dataArray[index]);
             } else {
               keyedOutputObj[label] = [dataArray[index]];
@@ -112,7 +120,7 @@ if(isSupportedFileType) {
         let longestDataArr = 0;
         arrayofDataArrays.forEach((dataArray) => {
           if (dataArray.length > longestDataArr) {
-            longestDataArr = dataArray.length
+            longestDataArr = dataArray.length;
           }
         });
         for (let i = 0; i < longestDataArr; i += 1) {
@@ -128,8 +136,8 @@ if(isSupportedFileType) {
       }
     }
   } else {
-    console.log(`Cannot convert to ${convertTo} file type`)
+    log(`Cannot convert to ${convertTo} file type`);
   }
 } else {
-  console.log('File type is not supported');
+  log('File type is not supported');
 }

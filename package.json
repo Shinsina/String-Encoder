@@ -1,5 +1,9 @@
 {
   "type": "module",
+  "scripts": {
+    "lint": "prettier --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
+    "format": "prettier --write --plugin-search-dir=. ."
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^16.0.0",
@@ -9,5 +13,12 @@
     "node-fetch": "^3.0.0",
     "puppeteer": "^14.0.0",
     "striptags": "^3.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.16.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "prettier": "^2.6.2"
   }
 }

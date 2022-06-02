@@ -102,7 +102,7 @@ export async function setBodyDelete(fields) {
   });
   const alerts = {
     success: 'Found Item(s) Deleted',
-    unconfirmed: 'Nothing deleted, please enter new search criteria'
+    unconfirmed: 'Nothing deleted, please enter new search criteria',
   };
   if (body.isDefinition) {
     alerts.confirm = 'Deleting type(s) will delete all implements of that type. Delete anyway?';

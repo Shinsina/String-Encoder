@@ -62,7 +62,7 @@ export function handleImplementFile(typeData, event) {
           const internalFields = {
             type: typeData.type,
             isDefinition: false,
-            created: new Date()
+            created: new Date(),
           };
           Object.keys(internalFields).forEach((field) => {
             if (field === 'created') {
@@ -120,7 +120,7 @@ export function handleTypeFile(event) {
         uploadQueue.forEach((itemToUpload) => {
           const internalFields = {
             isDefinition: true,
-            created: new Date()
+            created: new Date(),
           };
           Object.keys(internalFields).forEach((field) => {
             if (!itemToUpload[field]) {
@@ -149,7 +149,7 @@ function isValid(value) {
     'Numbers',
     'IDs',
     'Booleans',
-    'Dates'
+    'Dates',
   ];
   return dataTypes.includes(value);
 }
