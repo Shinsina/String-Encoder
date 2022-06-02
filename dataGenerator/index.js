@@ -1,18 +1,19 @@
+/* eslint-disable no-await-in-loop */
 import fs from 'fs';
 import inquirer from 'inquirer';
-import table from '../encoderAndDecoder/EncodeTable.js'
+import table from '../encoderAndDecoder/EncodeTable';
+
+const { log } = console;
 
 const main = async () => {
-  const {
-    numberOfFields,
-  } = await inquirer.prompt([
+  const { numberOfFields } = await inquirer.prompt([
     {
       type: 'number',
       name: 'numberOfFields',
       message: 'Enter the number of fields for this data type',
       default: 0,
-    }
-  ])
+    },
+  ]);
   const fieldNames = [];
   for (let fieldCounter = 0; fieldCounter < numberOfFields; fieldCounter += 1) {
     const { fieldName } = await inquirer.prompt([
@@ -20,8 +21,8 @@ const main = async () => {
         type: 'input',
         name: 'fieldName',
         message: `What is the name of the ${fieldCounter} field?`,
-      }
-    ])
+      },
+    ]);
     fieldNames.push(fieldName);
   }
   const fieldHasAcceptedValueList = [];
@@ -31,9 +32,9 @@ const main = async () => {
         type: 'confirm',
         name: 'hasAcceptedValueList',
         message: `Does field: ${fieldNames[fieldNameCounter]} have an accepted value list?`,
-        default: false
-      }
-    ])
+        default: false,
+      },
+    ]);
     fieldHasAcceptedValueList.push(hasAcceptedValueList);
   }
   const fieldPairings = {};
@@ -45,15 +46,15 @@ const main = async () => {
   const hasAcceptedValueList = Object.keys(fieldPairings).filter((key) => fieldPairings[key]);
   const noAcceptedValueList = Object.keys(fieldPairings).filter((key) => !fieldPairings[key]);
   const acceptedValueListFiles = [];
-  for (let valCount  = 0; valCount  < hasAcceptedValueList.length; valCount  += 1) {
+  for (let valCount = 0; valCount < hasAcceptedValueList.length; valCount += 1) {
     const { acceptedValueListFile } = await inquirer.prompt([
       {
         type: 'input',
         name: 'acceptedValueListFile',
         message: `Provide a relative file path to the accepted value list for ${hasAcceptedValueList[valCount]}`,
-        default: `./${hasAcceptedValueList[valCount]}.json`
-      }
-    ])
+        default: `./${hasAcceptedValueList[valCount]}.json`,
+      },
+    ]);
     acceptedValueListFiles.push(acceptedValueListFile);
   }
   const amountTypePairings = {};
@@ -63,15 +64,15 @@ const main = async () => {
         type: 'number',
         name: 'numberOfValuesToGenerate',
         message: `How many values should be generated for ${noAcceptedValueList[noValCount]}?`,
-        default: 1
+        default: 1,
       },
       {
         type: 'confirm',
         name: 'beHTML',
         message: `Should generated values for ${noAcceptedValueList[noValCount]} be HTML strings?`,
         default: false,
-      }
-    ])
+      },
+    ]);
     amountTypePairings[noAcceptedValueList[noValCount]] = { numberOfValuesToGenerate, beHTML };
   }
   const acceptableChars = Object.keys(table).filter((char) => char.match(/\w/));
@@ -79,15 +80,19 @@ const main = async () => {
   if (noAcceptedValueList.length) {
     Object.keys(amountTypePairings).forEach((key) => {
       const generatedArrForKey = [];
-      for (let genIndex = 0; genIndex < amountTypePairings[key].numberOfValuesToGenerate; genIndex += 1) {
+      for (
+        let genIndex = 0;
+        genIndex < amountTypePairings[key].numberOfValuesToGenerate;
+        genIndex += 1
+      ) {
         const generationLength = Math.floor(Math.random() * acceptableChars.length);
         const stringArr = [];
         for (let charIndex = 0; charIndex < generationLength * 500; charIndex += 1) {
           const selectedChar = acceptableChars[Math.floor(Math.random() * generationLength)];
-            stringArr.push(selectedChar);
+          stringArr.push(selectedChar);
         }
-        if(amountTypePairings[key].beHTML){
-          generatedArrForKey.push(`<p>${stringArr.join('')}</p>`)
+        if (amountTypePairings[key].beHTML) {
+          generatedArrForKey.push(`<p>${stringArr.join('')}</p>`);
         } else {
           generatedArrForKey.push(stringArr.join(''));
         }
@@ -103,25 +108,25 @@ const main = async () => {
   for (let currFileIndex = 0; currFileIndex < acceptedValueListFiles.length; currFileIndex += 1) {
     const { valuesToGenerateFromList } = await inquirer.prompt([
       {
-      type: 'number',
-      name: 'valuesToGenerateFromList',
-      message: `How many values should be generated for ${hasAcceptedValueList[currFileIndex]}?`,
-      default: 1
+        type: 'number',
+        name: 'valuesToGenerateFromList',
+        message: `How many values should be generated for ${hasAcceptedValueList[currFileIndex]}?`,
+        default: 1,
+      },
+    ]);
+    try {
+      const fileData = fs.readFileSync(acceptedValueListFiles[currFileIndex]);
+      const currentKeyAcceptedValues = [...JSON.parse(fileData)];
+      const generatedValuesForKey = [];
+      for (let genIndex = 0; genIndex < valuesToGenerateFromList; genIndex += 1) {
+        const randomIndex = Math.floor(Math.random() * currentKeyAcceptedValues.length);
+        generatedValuesForKey.push(currentKeyAcceptedValues[randomIndex]);
+      }
+      masterFromFileGenerated.push(generatedValuesForKey);
+    } catch (e) {
+      log(`File not found ${acceptedValueListFiles[currFileIndex]}`);
+      masterFromFileGenerated.push([]);
     }
-  ]);
-  try {
-    const fileData = fs.readFileSync(acceptedValueListFiles[currFileIndex]);
-    const currentKeyAcceptedValues = [...JSON.parse(fileData)];
-    const generatedValuesForKey = [];
-    for (let genIndex = 0; genIndex < valuesToGenerateFromList; genIndex += 1) {
-      const randomIndex = Math.floor(Math.random() * currentKeyAcceptedValues.length);
-      generatedValuesForKey.push(currentKeyAcceptedValues[randomIndex]);
-    }
-    masterFromFileGenerated.push(generatedValuesForKey);
-  } catch(e) {
-    console.log(`File not found ${acceptedValueListFiles[currFileIndex]}`);
-    masterFromFileGenerated.push([]);
-  }
   }
   hasAcceptedValueList.forEach((item, index) => {
     finalizeGeneration[item] = masterFromFileGenerated[index];
@@ -132,7 +137,7 @@ const main = async () => {
     if (finalizeGeneration[key].length > longestArr) {
       longestArr = finalizeGeneration[key].length;
     }
-  })
+  });
   const arraysForOuputData = [];
   finalizeGenerationKeys.forEach((key) => {
     arraysForOuputData.push(finalizeGeneration[key]);
@@ -141,14 +146,17 @@ const main = async () => {
   for (let currArrIndex = 0; currArrIndex < longestArr; currArrIndex += 1) {
     outputDataObjects.push({});
     for (let currKey = 0; currKey < finalizeGenerationKeys.length; currKey += 1) {
-      if (finalizeGeneration[finalizeGenerationKeys[currKey]][currArrIndex]){
+      if (finalizeGeneration[finalizeGenerationKeys[currKey]][currArrIndex]) {
+        // eslint-disable-next-line max-len
         outputDataObjects[currArrIndex][finalizeGenerationKeys[currKey]] = finalizeGeneration[finalizeGenerationKeys[currKey]][currArrIndex];
       } else {
         outputDataObjects[currArrIndex][finalizeGenerationKeys[currKey]] = '';
       }
     }
   }
-  if(outputDataObjects.length) fs.writeFileSync('./output.json', JSON.stringify(outputDataObjects));
-}
+  if (outputDataObjects.length) {
+    fs.writeFileSync('./output.json', JSON.stringify(outputDataObjects));
+  }
+};
 
 main();

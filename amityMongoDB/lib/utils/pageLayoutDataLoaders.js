@@ -3,7 +3,7 @@ import {
   validateBooleans,
   validateIDs,
   validateWords,
-  validateDates
+  validateDates,
 } from './prerequestValidator';
 
 // This is the baseline TailwindCSS classes to apply to the outer-most div for a given page layout.
@@ -28,13 +28,13 @@ export function implementPageLayoutDataLoader(dataTypeIngest) {
           type: dataTypeIngest.type,
           typeExtended: dataTypeIngest.typeExtended,
           isDefinition: false,
-          updated: new Date()
+          updated: new Date(),
         }
       : {
           type: dataTypeIngest.type,
           typeExtended: dataTypeIngest.typeExtended,
           isDefinition: false,
-          created: new Date()
+          created: new Date(),
         };
     Object.keys(bodyFields).forEach((key) => {
       body[key] = bodyFields[key];
@@ -47,22 +47,22 @@ export function implementPageLayoutDataLoader(dataTypeIngest) {
           if (type.match(/s$/)) {
             fieldValueStore[key] = {
               type: `${type.replace(/s$/, '')}`,
-              value: []
+              value: [],
             };
           } else if (type === 'Boolean') {
             fieldValueStore[key] = {
               type,
-              value: false
+              value: false,
             };
           } else if (type === 'Number') {
             fieldValueStore[key] = {
               type,
-              value: 0
+              value: 0,
             };
           } else if (['Word', 'ID', 'Date'].includes(type)) {
             fieldValueStore[key] = {
               type,
-              value: ''
+              value: '',
             };
           }
         } else {
@@ -75,7 +75,7 @@ export function implementPageLayoutDataLoader(dataTypeIngest) {
           const value = fieldType === 'Date' && !Array.isArray(type) ? new Date(type) : type;
           fieldValueStore[key] = {
             type: fieldType,
-            value
+            value,
           };
         }
       }
@@ -110,7 +110,7 @@ export function editTypePageLayoutDataLoader(dataTypeIngest) {
     isDefinition: true,
     updated: new Date(),
     oldTypeName,
-    typeExtended
+    typeExtended,
   };
   return { typeName, fields, oldFields, body };
 }
@@ -138,7 +138,7 @@ export function extendTypePageLayoutDataLoader(dataTypeIngest, typeToExtend) {
   const body = {
     created: new Date(),
     isDefinition: true,
-    typeExtended
+    typeExtended,
   };
   return { fields, oldFields, body };
 }

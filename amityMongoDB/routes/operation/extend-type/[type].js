@@ -13,16 +13,16 @@ export async function load({ params, fetch }) {
       isDefinition: 0,
       created: 0,
       updated: 0,
-      _refs: 0
-    }
+      _refs: 0,
+    },
   };
   const url = '/endpoints';
   const res = await fetch(url, {
     method: 'GET',
     headers: {
       'content-type': 'application/json',
-      'query-body': JSON.stringify(body)
-    }
+      'query-body': JSON.stringify(body),
+    },
   });
   if (res.ok) {
     const data = await res.json();
@@ -31,12 +31,12 @@ export async function load({ params, fetch }) {
     if (dataTypeIngest) typeData = extendTypePageLayoutDataLoader(dataTypeIngest, type);
     return {
       props: {
-        typeData
-      }
+        typeData,
+      },
     };
   }
   return {
     status: res.status,
-    error: new Error(`Could not load ${url}`)
+    error: new Error(`Could not load ${url}`),
   };
 }

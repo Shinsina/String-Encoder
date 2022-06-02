@@ -9,7 +9,9 @@ async function download(relativeFolder, item) {
   const extractFileName = item.id ? item.url.match(/\/.+\/(.+)/) : item.match(/\/.+\/(.+)/);
   const extractedFile = extractFileName[1];
   try {
-    const filePath = item.id ? `${relativeFolder}/${item.id}_${extractedFile}` : `${relativeFolder}/${extractedFile}`;
+    const filePath = item.id
+      ? `${relativeFolder}/${item.id}_${extractedFile}`
+      : `${relativeFolder}/${extractedFile}`;
     if (!fs.existsSync(filePath)) {
       const response = item.id ? await fetch(item.url) : await fetch(item);
       const buffer = await response.buffer();
@@ -34,10 +36,7 @@ async function readLines(stream) {
 }
 
 const main = async () => {
-  const {
-    urlListFileName,
-    destinationFolderName,
-  } = await inquirer.prompt([
+  const { urlListFileName, destinationFolderName } = await inquirer.prompt([
     {
       type: 'input',
       name: 'urlListFileName',
@@ -74,14 +73,16 @@ const main = async () => {
     }
     const notImages = [];
     const isImage = /\.jpg|jpeg|jpe|png|gif$/i;
-    await Promise.all([urls.forEach(async (item) => {
-      const url = item.id ? item.url : item;
-      if (url.match(isImage)) {
-        await download(destinationFolderName, item);
-      } else {
-        notImages.push(url);
-      }
-    })]);
+    await Promise.all([
+      urls.forEach(async (item) => {
+        const url = item.id ? item.url : item;
+        if (url.match(isImage)) {
+          await download(destinationFolderName, item);
+        } else {
+          notImages.push(url);
+        }
+      }),
+    ]);
     if (notImages.length) {
       fs.writeFileSync('./notImages.json', JSON.stringify(notImages));
     }

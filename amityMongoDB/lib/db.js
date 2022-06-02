@@ -28,14 +28,14 @@ export async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     };
 
     // @ts-ignore
     cached.promise = MongoClient.connect(MONGODB_URI, opts).then((client) => {
       return {
         client,
-        db: client.db(MONGODB_DB)
+        db: client.db(MONGODB_DB),
       };
     });
   }

@@ -1,39 +1,41 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
 
+const { log } = console;
+
 const resolveFieldTypes = (key, rootLevelProperty) => {
   const typeResolution = {};
   if (typeof rootLevelProperty === 'object') {
     typeResolution[key] = {};
     Object.keys(rootLevelProperty).forEach((property) => {
       if (typeof rootLevelProperty[property] === 'number') {
-          const isInteger = rootLevelProperty[property] % 1 === 0 ? true : false;
-          if (isInteger) typeResolution[key][property] = { type: 'GraphQLInt' };
-          else typeResolution[key][property] = { type: 'GraphQLFloat' };
+        const isInteger = rootLevelProperty[property] % 1 === 0;
+        if (isInteger) typeResolution[key][property] = { type: 'GraphQLInt' };
+        else typeResolution[key][property] = { type: 'GraphQLFloat' };
       } else if (typeof rootLevelProperty[property] === 'string') {
         typeResolution[key][property] = { type: 'GraphQLString' };
       } else if (typeof rootLevelProperty[property] === 'boolean') {
         typeResolution[key][property] = { type: 'GraphQLBoolean' };
       } else {
-        console.log(`Data on field ${key} contains non-primitive data types!`)
+        log(`Data on field ${key} contains non-primitive data types!`);
       }
-    })
+    });
   } else if (typeof rootLevelProperty === 'number') {
-      const isInteger = rootLevelProperty % 1 === 0 ? true : false;
-      if (isInteger) typeResolution[key] = { type: 'GraphQLInt' };
-      else typeResolution[key] = { type: 'GraphQLFloat' };
-    } else if (typeof rootLevelProperty === 'string') {
-      typeResolution[key] = { type: 'GraphQLString' };
-    } else if (typeof rootLevelProperty[property] === 'boolean') {
-      typeResolution[key] = { type: 'GraphQLBoolean' };
-    } else {
-      console.log(`Data on field ${key} contains non-primitive data types!`)
-    }
-  return typeResolution
-}
+    const isInteger = rootLevelProperty % 1 === 0;
+    if (isInteger) typeResolution[key] = { type: 'GraphQLInt' };
+    else typeResolution[key] = { type: 'GraphQLFloat' };
+  } else if (typeof rootLevelProperty === 'string') {
+    typeResolution[key] = { type: 'GraphQLString' };
+  } else if (typeof rootLevelProperty === 'boolean') {
+    typeResolution[key] = { type: 'GraphQLBoolean' };
+  } else {
+    log(`Data on field ${key} contains non-primitive data types!`);
+  }
+  return typeResolution;
+};
 
 const main = async () => {
-  const url = 'https://itunes.apple.com/lookup?id=449513466&entity=song&limit=135'
+  const url = 'https://itunes.apple.com/lookup?id=449513466&entity=song&limit=135';
   const response = await fetch(url);
   const jsonRes = await response.json();
   const jsonFieldDefinitions = [];
@@ -49,7 +51,7 @@ const main = async () => {
         // This will flatten them so as to return 1 field of whatever type the innermost element is
         while (isArray) {
           const arrayInnerLength = currentArray.length;
-          const randomInnerIndex = Math.ceil(Math.random() * arrayInnerLength)
+          const randomInnerIndex = Math.ceil(Math.random() * arrayInnerLength);
           currentArray = currentArray[randomInnerIndex];
           isArray = Array.isArray(currentArray[randomInnerIndex]);
         }
@@ -67,12 +69,12 @@ const main = async () => {
   });
 
   jsonFieldDefinitions.forEach((fieldDef) => {
-    jsonTypeDefinition = {...jsonTypeDefinition, ...fieldDef}
+    jsonTypeDefinition = { ...jsonTypeDefinition, ...fieldDef };
   });
 
-  const overallTypeDef = 'const OverallDefinitionType = new GraphQLObjectType ({ \n name: \'OverallDefinition\',\n'
+  const overallTypeDef = "const OverallDefinitionType = new GraphQLObjectType({ \n  name: 'OverallDefinition',\n";
   const overallTypeDefs = [];
-  const typeFieldDef = '  fields: () => ({ \n'
+  const typeFieldDef = '  fields: () => ({ \n';
   const individualFieldDefs = {};
   const typeDefs = [];
   jsonTypeDefinition.listFields.forEach((listField) => {
@@ -80,10 +82,14 @@ const main = async () => {
       individualFieldDefs[listField] = [];
       Object.keys(jsonTypeDefinition[listField]).forEach((field) => {
         const { type } = jsonTypeDefinition[listField][field];
-        if (type) individualFieldDefs[listField].push(`    ${field}: { type: ${type} },\n`)
+        if (type) individualFieldDefs[listField].push(`    ${field}: { type: ${type} },\n`);
       });
-      if (individualFieldDefs[listField].length) individualFieldDefs[listField] = individualFieldDefs[listField].join('').concat('  })');
-      const typeDef = `const ${listField}Type = new GraphQLObjectType ({ \n  name: '${listField}',\n${typeFieldDef.concat(individualFieldDefs[listField])}\n});`;
+      if (individualFieldDefs[listField].length) {
+        individualFieldDefs[listField] = individualFieldDefs[listField].join('').concat('  }),');
+      }
+      const typeDef = `const ${listField}Type = new GraphQLObjectType({ \n  name: '${listField}',\n${typeFieldDef.concat(
+        individualFieldDefs[listField],
+      )}\n});`;
       typeDefs.push(typeDef);
       overallTypeDefs.push(`    ${listField}: { type: new GraphQLList(${listField}Type) },\n`);
       delete jsonTypeDefinition[listField];
@@ -91,36 +97,49 @@ const main = async () => {
   });
   delete jsonTypeDefinition.listFields;
   Object.keys(jsonTypeDefinition).forEach((field) => {
-    overallTypeDefs.push(`    ${field}: { type: ${jsonTypeDefinition[field].type} },\n`)
+    overallTypeDefs.push(`    ${field}: { type: ${jsonTypeDefinition[field].type} },\n`);
     delete jsonTypeDefinition[field];
   });
 
-  const finalOverallTypeDef = overallTypeDef.concat(`${typeFieldDef.concat(overallTypeDefs.join('').concat('  })'))}\n});`);
+  const finalOverallTypeDef = overallTypeDef.concat(
+    `${typeFieldDef.concat(overallTypeDefs.join('').concat('  }),'))}\n});`,
+  );
 
   const query = `const query = new GraphQLObjectType({
-    name: 'RootQueryType',
-    fields: {
-      overalldefinition: {
-        type: OverallDefinitionType,
-        args: { url: { type: GraphQLString } },
-        resolve(_, args) {
-          return fetch(args.url).then((data) => data.json());
-        }
-      }
-    }
-  })`;
-  const exportDefault = 'export default new GraphQLSchema({ query })'
-  fs.writeFileSync('./test.js', `import { GraphQLInt, GraphQLFloat, GraphQLString, GraphQLBoolean, GraphQLObjectType, GraphQLList, GraphQLSchema } from 'graphql';
-  import fetch from 'node-fetch';
+  name: 'RootQueryType',
+  fields: {
+    overalldefinition: {
+      type: OverallDefinitionType,
+      args: { url: { type: GraphQLString } },
+      resolve(_, args) {
+        return fetch(args.url).then((data) => data.json());
+      },
+    },
+  },
+});`;
+  const exportDefault = 'export default new GraphQLSchema({ query });';
+  fs.writeFileSync(
+    './test.js',
+    `import {
+  GraphQLInt,
+  GraphQLFloat,
+  GraphQLString,
+  GraphQLBoolean,
+  GraphQLObjectType,
+  GraphQLList,
+  GraphQLSchema,
+} from 'graphql';
+import fetch from 'node-fetch';
 
-  ${typeDefs.join('\n')}
+${typeDefs.join('\n')}
 
-  ${finalOverallTypeDef}
+${finalOverallTypeDef}
 
-  ${query}
+${query}
 
-  ${exportDefault}
-  `)
-}
+${exportDefault}
+  `,
+  );
+};
 
-main()
+main();

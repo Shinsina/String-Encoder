@@ -4,14 +4,14 @@
  * @param {String} method The method by which to send the request ('GET', 'POST', 'PUT', 'DELETE').
  * @returns {Promise<Object>} The data returned from a successful event or an error code number and message
  */
- export async function request(body, method) {
+export async function request(body, method) {
   const url = '/endpoints';
   const res = await fetch(url, {
     method: method,
     headers: {
-      'content-type': 'application/json'
+      'content-type': 'application/json',
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
   if (res.ok) {
     return await res.json();
@@ -19,7 +19,7 @@
 
   return {
     status: res.status,
-    error: new Error(`Could not load ${url}`)
+    error: new Error(`Could not load ${url}`),
   };
 }
 
@@ -63,15 +63,15 @@ export async function browseQuery(queryParams, collection, ObjectId) {
     return {
       status: 200,
       body: {
-        results
-      }
+        results,
+      },
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Requested data was not found'
-      }
+        error: 'Requested data was not found',
+      },
     };
   }
 }
@@ -100,7 +100,7 @@ export async function insertNewItem(body, collection, ObjectId) {
         documentFields[key][0].match(/\d{4}-\d{2}-\d{2}T(\d{2}:){2}\d{2}\.\d{3}Z/)
       ) {
         documentFields[key].forEach(
-          (_, index) => (documentFields[key][index] = new Date(documentFields[key][index]))
+          (_, index) => (documentFields[key][index] = new Date(documentFields[key][index])),
         );
       }
     });
@@ -108,15 +108,15 @@ export async function insertNewItem(body, collection, ObjectId) {
     return {
       status: 200,
       body: {
-        results
-      }
+        results,
+      },
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Requested data was unable to be inserted'
-      }
+        error: 'Requested data was unable to be inserted',
+      },
     };
   }
 }
@@ -132,7 +132,7 @@ export async function insertNewItems(body, collection, ObjectId) {
   try {
     // This needs to be validated as it is unknown whether or not this behaves as intended (i.e returns all references on all documents).
     const references = await Promise.all(
-      body.map((item) => createEmbeddedReferences(item, collection, ObjectId))
+      body.map((item) => createEmbeddedReferences(item, collection, ObjectId)),
     );
     const items = body.map((item, index) => {
       const _refs = references[index];
@@ -156,15 +156,15 @@ export async function insertNewItems(body, collection, ObjectId) {
     return {
       status: 200,
       body: {
-        results
-      }
+        results,
+      },
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Requested data was unable to be inserted'
-      }
+        error: 'Requested data was unable to be inserted',
+      },
     };
   }
 }
@@ -185,7 +185,7 @@ export async function updateExtensionsOfType(
   oldTypeName,
   renameTypeProps,
   newTypeProps,
-  ObjectId
+  ObjectId,
 ) {
   try {
     const extendsRootType = new RegExp(`${oldTypeName}`);
@@ -197,20 +197,20 @@ export async function updateExtensionsOfType(
           { _id: ObjectId(result._id) },
           {
             $rename: { ...renameTypeProps },
-            $set: { typeExtended: result.typeExtended, ...newTypeProps }
-          }
+            $set: { typeExtended: result.typeExtended, ...newTypeProps },
+          },
         )
         .then(await updateEmbeddedReferences(ObjectId(result._id), collection));
     });
     return {
-      results
+      results,
     };
   } catch {
     return {
       status: 500,
       body: {
-        error: 'Type Extension(s) were unable to be updated'
-      }
+        error: 'Type Extension(s) were unable to be updated',
+      },
     };
   }
 }
@@ -252,7 +252,7 @@ export async function createEmbeddedReferences(item, collection, ObjectId) {
     });
     const referencedDocuments = await collection
       .find({
-        $or: [{ _id: { $in: idsToReference } }, { type: { $in: types }, isDefinition: true }]
+        $or: [{ _id: { $in: idsToReference } }, { type: { $in: types }, isDefinition: true }],
       })
       .project({ _refs: 0 })
       .toArray();
@@ -263,12 +263,14 @@ export async function createEmbeddedReferences(item, collection, ObjectId) {
     if (Object.keys(_refs).length || !idsToReference.length) return _refs;
     return {
       status: 404,
-      body: { error: 'References were unable to be found, embedded ids likely may not (yet) exist' }
+      body: {
+        error: 'References were unable to be found, embedded ids likely may not (yet) exist',
+      },
     };
   } catch {
     return {
       status: 500,
-      body: { error: 'References were unable to be found due to connection failure' }
+      body: { error: 'References were unable to be found due to connection failure' },
     };
   }
 }
@@ -285,12 +287,12 @@ export async function updateEmbeddedReferences(id, collection) {
     }
     return {
       status: 404,
-      body: { error: 'References were unable to be found, they may not (yet) exist' }
+      body: { error: 'References were unable to be found, they may not (yet) exist' },
     };
   } catch {
     return {
       status: 500,
-      body: { error: 'References were unable to be updated due to connection failure' }
+      body: { error: 'References were unable to be updated due to connection failure' },
     };
   }
 }
