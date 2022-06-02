@@ -60,7 +60,7 @@ const main = async () => {
         jsonFieldDefinitions.push(resolveFieldTypes(key, currentArray[finalRandomInnerIndex]));
         jsonTypeDefinition.listFields.push(key);
       } else {
-        jsonFieldDefinitions.push(resolveFieldTypes(key, jsonRes[key][randomIndex]));
+        jsonFieldDefinitions.push(resolveFieldTypes(key, jsonRes[key][randomIndex - 1]));
         jsonTypeDefinition.listFields.push(key);
       }
     } else {
