@@ -1,7 +1,7 @@
 import fs from 'fs';
 import readline from 'readline';
 import inquirer from 'inquirer';
-import { returnFieldNames, unravelObject } from './fieldHelpers';
+import { returnFieldNames, unravelObject } from './fieldHelpers.js';
 
 const { log } = console;
 
