@@ -73,9 +73,9 @@ const main = async () => {
   });
 
   // ODT = Overall Definition Type
-  const overallTypeDef = "const ODT = new GraphQLObjectType({ \n  name: 'OverallDefinition',\n";
+  const overallTypeDef = "const ODT = new GraphQLObjectType({\n  name: 'OverallDefinition',\n";
   const overallTypeDefs = [];
-  const typeFieldDef = '  fields: () => ({ \n';
+  const typeFieldDef = '  fields: () => ({\n';
   const individualFieldDefs = {};
   const typeDefs = [];
   jsonTypeDefinition.listFields.forEach((listField) => {
@@ -88,7 +88,7 @@ const main = async () => {
       if (individualFieldDefs[listField].length) {
         individualFieldDefs[listField] = individualFieldDefs[listField].join('').concat('  }),');
       }
-      const typeDef = `const ${listField}Type = new GraphQLObjectType({ \n  name: '${listField}',\n${typeFieldDef.concat(
+      const typeDef = `const ${listField}Type = new GraphQLObjectType({\n  name: '${listField}',\n${typeFieldDef.concat(
         individualFieldDefs[listField],
       )}\n});`;
       typeDefs.push(typeDef);
@@ -138,8 +138,7 @@ ${finalOverallTypeDef}
 
 ${query}
 
-${exportDefault}
-  `,
+${exportDefault}\n`,
   );
 };
 
