@@ -72,7 +72,8 @@ const main = async () => {
     jsonTypeDefinition = { ...jsonTypeDefinition, ...fieldDef };
   });
 
-  const overallTypeDef = "const OverallDefinitionType = new GraphQLObjectType({ \n  name: 'OverallDefinition',\n";
+  // ODT = Overall Definition Type
+  const overallTypeDef = "const ODT = new GraphQLObjectType({ \n  name: 'OverallDefinition',\n";
   const overallTypeDefs = [];
   const typeFieldDef = '  fields: () => ({ \n';
   const individualFieldDefs = {};
@@ -109,7 +110,7 @@ const main = async () => {
   name: 'RootQueryType',
   fields: {
     overalldefinition: {
-      type: OverallDefinitionType,
+      type: ODT,
       args: { url: { type: GraphQLString } },
       resolve(_, args) {
         return fetch(args.url).then((data) => data.json());

@@ -18,7 +18,17 @@ export function unravelObject(obj) {
     } else if (Array.isArray(obj[key])) {
       if (obj[key].length) {
         fieldNames += `${key}~ `;
-        // eslint-disable-next-line no-use-before-define
+        const unwindArray = (arr) => {
+          let internalFileLine = '';
+          for (let i = 0; i < arr.length; i += 1) {
+            if (typeof arr[i] === 'object' && !Array.isArray(arr[i]) && arr[i] !== null) {
+              internalFileLine += `~${unravelObject(arr[i])}`;
+            } else {
+              internalFileLine += `${String(arr[i])}~ `;
+            }
+          }
+          return internalFileLine;
+        };
         fileLine += `${unwindArray(obj[key])}`;
       }
     } else {
@@ -28,15 +38,3 @@ export function unravelObject(obj) {
   });
   return fileLine;
 }
-
-const unwindArray = (arr) => {
-  let fileLine = '';
-  for (let i = 0; i < arr.length; i += 1) {
-    if (typeof arr[i] === 'object' && !Array.isArray(arr[i]) && arr[i] !== null) {
-      fileLine += `~${unravelObject(arr[i])}`;
-    } else {
-      fileLine += `${String(arr[i])}~ `;
-    }
-  }
-  return fileLine;
-};

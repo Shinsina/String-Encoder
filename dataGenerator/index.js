@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import fs from 'fs';
 import inquirer from 'inquirer';
-import table from '../encoderAndDecoder/EncodeTable';
+import table from '../encoderAndDecoder/EncodeTable.js';
 
 const { log } = console;
 
@@ -132,25 +132,25 @@ const main = async () => {
     finalizeGeneration[item] = masterFromFileGenerated[index];
   });
   let longestArr = 0;
-  const finalizeGenerationKeys = Object.keys(finalizeGeneration);
-  finalizeGenerationKeys.forEach((key) => {
+  const finalGenKeys = Object.keys(finalizeGeneration);
+  finalGenKeys.forEach((key) => {
     if (finalizeGeneration[key].length > longestArr) {
       longestArr = finalizeGeneration[key].length;
     }
   });
   const arraysForOuputData = [];
-  finalizeGenerationKeys.forEach((key) => {
+  finalGenKeys.forEach((key) => {
     arraysForOuputData.push(finalizeGeneration[key]);
   });
   const outputDataObjects = [];
-  for (let currArrIndex = 0; currArrIndex < longestArr; currArrIndex += 1) {
+  // car = Current Array Index
+  for (let car = 0; car < longestArr; car += 1) {
     outputDataObjects.push({});
-    for (let currKey = 0; currKey < finalizeGenerationKeys.length; currKey += 1) {
-      if (finalizeGeneration[finalizeGenerationKeys[currKey]][currArrIndex]) {
-        // eslint-disable-next-line max-len
-        outputDataObjects[currArrIndex][finalizeGenerationKeys[currKey]] = finalizeGeneration[finalizeGenerationKeys[currKey]][currArrIndex];
+    for (let index = 0; index < finalGenKeys.length; index += 1) {
+      if (finalizeGeneration[finalGenKeys[index]][car]) {
+        outputDataObjects[car][finalGenKeys[index]] = finalizeGeneration[finalGenKeys[index]][car];
       } else {
-        outputDataObjects[currArrIndex][finalizeGenerationKeys[currKey]] = '';
+        outputDataObjects[car][finalGenKeys[index]] = '';
       }
     }
   }

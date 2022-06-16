@@ -1,7 +1,7 @@
 import fs from 'fs';
 import readline from 'readline';
 import inquirer from 'inquirer';
-import { returnFieldNames, unravelObject } from './fieldHelpers';
+import { returnFieldNames, unravelObject } from './fieldHelpers.js';
 
 const { log } = console;
 
@@ -62,7 +62,8 @@ const isNotJSON = async (filePath) => {
   return lines.join('\n');
 };
 
-const supportedFileTypes = {
+// SFT = Supported File Types
+const SFT = {
   json: (fileLoc) => isJSON(fileLoc),
   txt: async (fileLoc) => isNotJSON(fileLoc),
   csv: async (fileLoc) => isNotJSON(fileLoc),
@@ -76,19 +77,15 @@ const finalizeData = {
   xlsx: (processedData) => processedData.toString(),
 };
 
-const isSupportedFileType = fileLocation.match(/json$|txt$|csv$|xlsx$/)[0];
+// ISFT = Is Supported File Type
+const ISFT = fileLocation.match(/json$|txt$|csv$|xlsx$/)[0];
 const fileName = fileLocation.match(/\/(.+)\./)[1];
 
-if (isSupportedFileType) {
-  const processedData = isSupportedFileType === 'json'
-    ? supportedFileTypes[isSupportedFileType](fileLocation)
-    : await supportedFileTypes[isSupportedFileType](fileLocation);
-  if (supportedFileTypes[convertTo]) {
+if (ISFT) {
+  const processedData = ISFT === 'json' ? SFT[ISFT](fileLocation) : await SFT[ISFT](fileLocation);
+  if (SFT[convertTo]) {
     if (convertTo !== 'json') {
-      fs.writeFileSync(
-        `./${fileName}.${convertTo}`,
-        finalizeData[isSupportedFileType](processedData),
-      );
+      fs.writeFileSync(`./${fileName}.${convertTo}`, finalizeData[ISFT](processedData));
     } else {
       const keyedOutputObj = {};
       const arrayofDataArrays = [];
