@@ -5,6 +5,7 @@
     "format": "prettier --write --plugin-search-dir=. ."
   },
   "dependencies": {
+    "bluebird": "^3.7.2",
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^16.0.0",
     "graphql": "^16.5.0",
