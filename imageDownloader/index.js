@@ -6,16 +6,27 @@ import inquirer from 'inquirer';
 const { log } = console;
 
 async function download(relativeFolder, item) {
-  const extractFileName = item.id ? item.url.match(/\/.+\/(.+)/) : item.match(/\/.+\/(.+)/);
-  const extractedFile = extractFileName[1];
+  const extractFileName = item.id ? item.url.match(/\/.+?\/(.+)/) : item.match(/\/.+?\/(.+)/);
+  const extractedPath = extractFileName[1];
+  const pathExploded = extractedPath.split('/');
+  const extractedFolderPath = pathExploded.slice(0, -1).join('/');
+  const extractedFile = pathExploded.pop();
   try {
     const filePath = item.id
-      ? `${relativeFolder}/${item.id}_${extractedFile}`
-      : `${relativeFolder}/${extractedFile}`;
+      ? `${relativeFolder}/${extractedFolderPath}/${item.id}_${extractedFile}`
+      : `${relativeFolder}/${extractedFolderPath}/${extractedFile}`;
+    const buildingPath = [];
+    pathExploded.forEach((folder) => {
+      buildingPath.push(folder);
+      const absolutePath = `${relativeFolder}/${buildingPath.join('/')}`;
+      if (!fs.existsSync(absolutePath)) {
+        fs.mkdirSync(absolutePath);
+      }
+    });
     if (!fs.existsSync(filePath)) {
       const response = item.id ? await fetch(item.url) : await fetch(item);
       const buffer = await response.buffer();
-      fs.writeFile(filePath, buffer, () => log(`Downloaded ${extractedFile}`));
+      fs.writeFile(filePath, buffer, () => log(`Downloaded to ${filePath}`));
     }
   } catch (e) {
     log(e);
