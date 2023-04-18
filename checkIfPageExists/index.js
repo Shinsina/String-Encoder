@@ -1,8 +1,27 @@
 import fs from 'fs';
-import fetch from 'node-fetch';
 import inquirer from 'inquirer';
+import puppeteer from 'puppeteer';
+import bluebird from 'bluebird';
 
 const { log } = console;
+
+const withBrowser = async (fn) => {
+  const browser = await puppeteer.launch({/* ... */});
+  try {
+    return await fn(browser);
+  } finally {
+    await browser.close();
+  }
+};
+
+const withPage = (browser) => async (fn) => {
+  const page = await browser.newPage();
+  try {
+    return await fn(page);
+  } finally {
+    await page.close();
+  }
+};
 
 const main = async () => {
   const { urlListFileName } = await inquirer.prompt([
@@ -16,19 +35,19 @@ const main = async () => {
   const urls = [];
   const fileData = fs.readFileSync(urlListFileName);
   urls.push(...JSON.parse(fileData));
-  const fetched = await Promise.all(urls.map(async (url, index) => {
-    let response = '';
-    try {
-      const fetchOp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      log(`Attempting to fetch ${index} of ${urls.length}...`);
-      response = { url, status: fetchOp.status };
-    } catch (error) {
-      response = { url, status: 404 };
+  const results = [];
+  await withBrowser(async (b) => bluebird.map(urls, async (url, index) => withPage(b)(async (p) => {
+    await p.setJavaScriptEnabled(true);
+    await p.setDefaultNavigationTimeout(0);
+    const response = await p.goto(url, { waitUntil: 'networkidle0' });
+    log(`Processing URL ${index} of ${urls.length}`);
+    if (response.status() === 200 && (url !== p.url())) {
+      results.push({ originalUrl: url, status: 301, finalUrl: p.url() });
+    } else {
+      results.push({ originalUrl: url, status: response.status(), finalUrl: p.url() });
     }
-    return response;
-  }));
-  const notFounds = fetched.filter((v) => v.status === 404).map((v) => v.url);
-  fs.writeFileSync('./notFound.json', JSON.stringify(notFounds));
+  }), { concurrency: 5 }));
+  fs.writeFileSync('./output.json', JSON.stringify(results));
 };
 
 main();
