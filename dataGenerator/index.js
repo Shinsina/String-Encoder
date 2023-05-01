@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import fs from 'fs';
 import inquirer from 'inquirer';
-import table from '../encoderAndDecoder/EncodeTable.js';
+import table from '../utils/encode-table.js';
 
 const { log } = console;
 

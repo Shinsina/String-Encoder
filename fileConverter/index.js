@@ -1,6 +1,6 @@
 import fs from 'fs';
-import readline from 'readline';
 import inquirer from 'inquirer';
+import readLines from '../utils/read-lines.js';
 import { returnFieldNames, unravelObject } from './fieldHelpers.js';
 
 const { log } = console;
@@ -26,19 +26,6 @@ const { fileLocation, convertTo, hasLabels } = await inquirer.prompt([
     when: (ans) => !ans.fileLocation.match(/json$/),
   },
 ]);
-
-async function readLines(stream) {
-  const lineReader = readline.createInterface({
-    input: stream,
-    crlfDelay: Infinity,
-  });
-  return new Promise((resolve) => {
-    stream.once('error', () => resolve(null));
-    const lines = [];
-    lineReader.on('line', (line) => lines.push(line));
-    lineReader.on('close', () => resolve(lines));
-  });
-}
 
 const isJSON = (filePath) => {
   const fileData = fs.readFileSync(filePath);

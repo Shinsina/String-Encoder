@@ -1,7 +1,7 @@
 import fs from 'fs';
-import readline from 'readline';
 import fetch from 'node-fetch';
 import inquirer from 'inquirer';
+import readLines from '../utils/read-lines.js';
 
 const { log } = console;
 
@@ -25,25 +25,12 @@ async function download(relativeFolder, item) {
     });
     if (!fs.existsSync(filePath)) {
       const response = item.id ? await fetch(item.url) : await fetch(item);
-      const buffer = await response.buffer();
-      fs.writeFile(filePath, buffer, () => log(`Downloaded to ${filePath}`));
+      const arrayBuffer = await response.arrayBuffer();
+      fs.createWriteStream(filePath).write(Buffer.from(arrayBuffer));
     }
   } catch (e) {
     log(e);
   }
-}
-
-async function readLines(stream) {
-  const lineReader = readline.createInterface({
-    input: stream,
-    crlfDelay: Infinity,
-  });
-  return new Promise((resolve) => {
-    stream.once('error', () => resolve(null));
-    const lines = [];
-    lineReader.on('line', (line) => lines.push(line));
-    lineReader.on('close', () => resolve(lines));
-  });
 }
 
 const main = async () => {
@@ -51,13 +38,13 @@ const main = async () => {
     {
       type: 'input',
       name: 'urlListFileName',
-      message: 'Enter the relative path to the list of image URLs',
+      message: 'Enter the relative path to the list of file URLs',
       default: './urls.json',
     },
     {
       type: 'input',
       name: 'destinationFolderName',
-      message: 'Enter the relative path to the folder the images should download to',
+      message: 'Enter the relative path to the folder the files should download to',
       default: './Downloaded',
     },
   ]);
@@ -87,11 +74,10 @@ const main = async () => {
     await Promise.all([
       urls.forEach(async (item) => {
         const url = item.id ? item.url : item;
-        if (url.match(isImage)) {
-          await download(destinationFolderName, item);
-        } else {
+        if (!url.match(isImage)) {
           notImages.push(url);
         }
+        await download(destinationFolderName, item);
       }),
     ]);
     if (notImages.length) {

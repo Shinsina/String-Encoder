@@ -1,4 +1,4 @@
-import table from './EncodeTable.js';
+import table from '../utils/encode-table.js';
 
 export function encoder(unencodedString) {
   const unencodedStringSplit = unencodedString.split('');
