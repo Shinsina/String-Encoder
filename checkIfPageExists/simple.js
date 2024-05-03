@@ -1,7 +1,6 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
 import inquirer from 'inquirer';
-import bluebird from 'bluebird';
 
 const { log } = console;
 
@@ -18,7 +17,7 @@ const main = async () => {
   const fileData = fs.readFileSync(urlListFileName);
   urls.push(...JSON.parse(fileData));
   const fetched = [];
-  await bluebird.map(urls, async (url, index) => {
+  await Promise.all(urls.map(async (url, index) => {
     log(`Processing URL ${index} of ${urls.length}`);
     const response = await fetch(url);
     if (response.status === 200 && (url !== response.url)) {
@@ -26,7 +25,7 @@ const main = async () => {
     } else {
       fetched.push({ originalUrl: url, status: response.status, finalUrl: response.url });
     }
-  }, { concurrency: 5 });
+  }));
   fs.writeFileSync('./output.json', JSON.stringify(fetched));
 };
 
