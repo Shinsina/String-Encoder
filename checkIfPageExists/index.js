@@ -28,7 +28,7 @@ const main = async () => {
     } else {
       results.push({ originalUrl: url, status: response.status(), finalUrl: p.url() });
     }
-  }), { concurrency: 5 }));
+  }), { concurrency: 5 })).catch((e) => log(e));
   fs.writeFileSync('./output.json', JSON.stringify(results));
 };
 
