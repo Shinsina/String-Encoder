@@ -5,7 +5,7 @@ import readLines from '../utils/read-lines.js';
 
 const { log } = console;
 
-async function download(relativeFolder, item) {
+async function download(relativeFolder, item, index) {
   const extractFileName = item.id ? item.url.match(/\/.+?\/(.+)/) : item.match(/\/.+?\/(.+)/);
   const extractedPath = extractFileName[1];
   const pathExploded = extractedPath.split('/');
@@ -19,15 +19,16 @@ async function download(relativeFolder, item) {
     pathExploded.forEach((folder) => {
       buildingPath.push(folder);
       const absolutePath = `${relativeFolder}/${buildingPath.join('/')}`;
-      if (!fs.existsSync(absolutePath)) {
-        fs.mkdirSync(absolutePath);
+      if (!fs.existsSync(decodeURIComponent(absolutePath))) {
+        fs.mkdirSync(decodeURIComponent(absolutePath));
       }
     });
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(decodeURIComponent(filePath))) {
       const response = item.id ? await fetch(item.url) : await fetch(item);
       const arrayBuffer = await response.arrayBuffer();
-      fs.createWriteStream(filePath).write(Buffer.from(arrayBuffer));
+      fs.createWriteStream(decodeURIComponent(filePath)).write(Buffer.from(arrayBuffer));
     }
+    log(index);
   } catch (e) {
     log(e);
   }
@@ -70,14 +71,14 @@ const main = async () => {
       fs.mkdirSync(destinationFolderName);
     }
     const notImages = [];
-    const isImage = /\.jpg|jpeg|jpe|png|gif$/i;
+    const isImage = /\.jpg|jpeg|jpe|png|gif|webp|pdf$/i;
     await Promise.all([
-      urls.forEach(async (item) => {
+      urls.forEach(async (item, index) => {
         const url = item.id ? item.url : item;
         if (!url.match(isImage)) {
           notImages.push(url);
         }
-        await download(destinationFolderName, item);
+        await download(destinationFolderName, item, index);
       }),
     ]);
     if (notImages.length) {
