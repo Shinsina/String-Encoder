@@ -13,20 +13,25 @@ const main = async () => {
       default: './urls.json',
     },
   ]);
-  const urls = [];
   const fileData = fs.readFileSync(urlListFileName);
-  urls.push(...JSON.parse(fileData));
+  const urls = JSON.parse(fileData);
   const fetched = [];
-  await Promise.all(urls.map(async (url, index) => {
-    log(`Processing URL ${index} of ${urls.length}`);
-    const response = await fetch(url);
-    if (response.status === 200 && (url !== response.url)) {
-      fetched.push({ originalUrl: url, status: 301, finalUrl: response.url });
-    } else {
-      fetched.push({ originalUrl: url, status: response.status, finalUrl: response.url });
-    }
-  }));
-  fs.writeFileSync('./output.json', JSON.stringify(fetched));
+  if (Array.isArray(urls) && urls.filter((v) => typeof v === 'string').length) {
+    await Promise.all(
+      urls.map(async (url, index) => {
+        const response = await fetch(url);
+        if (response.status === 200 && url !== response.url) {
+          fetched.push({ originalUrl: url, status: 301, finalUrl: response.url });
+        } else {
+          fetched.push({ originalUrl: url, status: response.status, finalUrl: response.url });
+        }
+        log(`Processing URL ${index + 1} of ${urls.length}`);
+      }),
+    );
+    fs.writeFileSync('./output.json', JSON.stringify(fetched));
+  } else {
+    log('File provided is not an array of strings!');
+  }
 };
 
 main();
