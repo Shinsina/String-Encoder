@@ -19,13 +19,17 @@ const main = async () => {
   if (Array.isArray(urls) && urls.filter((v) => typeof v === 'string').length) {
     await Promise.all(
       urls.map(async (url, index) => {
-        const response = await fetch(url);
-        if (response.status === 200 && url !== response.url) {
-          fetched.push({ originalUrl: url, status: 301, finalUrl: response.url });
-        } else {
-          fetched.push({ originalUrl: url, status: response.status, finalUrl: response.url });
+        try {
+          const response = await fetch(url, { follow: 5 });
+          if (response.status === 200 && url !== response.url) {
+            fetched.push({ originalUrl: url, status: 301, finalUrl: response.url });
+          } else {
+            fetched.push({ originalUrl: url, status: response.status, finalUrl: response.url });
+          }
+          log(`Processing URL ${index + 1} of ${urls.length}`);
+        } catch (e) {
+          log(e);
         }
-        log(`Processing URL ${index + 1} of ${urls.length}`);
       }),
     );
     fs.writeFileSync('./output.json', JSON.stringify(fetched));
