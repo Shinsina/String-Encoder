@@ -6,20 +6,17 @@
   },
   "dependencies": {
     "bluebird": "^3.7.2",
-    "cheerio": "^1.0.0-rc.10",
-    "dotenv": "^16.0.0",
-    "graphql": "^16.8.1",
-    "inquirer": "^8.1.5",
-    "mongodb": "^4.17.0",
-    "node-fetch": "^3.2.10",
+    "cheerio": "^1.0.0",
+    "inquirer": "^10.2.2",
+    "node-fetch": "^3.3.2",
     "puppeteer": "^22.11.2",
     "striptags": "^3.2.0"
   },
   "devDependencies": {
-    "eslint": "^8.16.0",
+    "eslint": "^9.10.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "prettier": "^2.6.2"
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "prettier": "^3.3.3"
   }
 }
